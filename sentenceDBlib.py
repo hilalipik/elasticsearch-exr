@@ -2,27 +2,27 @@ from elasticsearch import Elasticsearch
 
 class dbHandle:
     def __init__(self, db_name):
-        self.INDEX_NAME = db_name
-        self.es = Elasticsearch(["http://localhost:9200"])
-        self.init_db()
+        self.__INDEX_NAME__ = db_name
+        self.__es__ = Elasticsearch(["http://localhost:9200"])
+        self.__init_db__()
 
 
-    def delete_db(self):
-        self.es.indices.delete(index=self.INDEX_NAME)
+    def __delete_db__(self):
+        self.__es__.indices.delete(index=self.__INDEX_NAME__)
 
-    def init_db(self):
+    def __init_db__(self):
         '''
         Initializes data base if needed.
         '''
-        if not self.es.indices.exists(index=self.INDEX_NAME):
+        if not self.__es__.indices.exists(index=self.__INDEX_NAME__):
             mappings = {
                 "properties": {
                     "sentence": {"type": "text"} #, "analyzer": "standard"}
                 }
             }
-            self.es.indices.create(index=self.INDEX_NAME, mappings=mappings)
+            self.__es__.indices.create(index=self.__INDEX_NAME__, mappings=mappings)
 
-    def extract_sentences(self, res : "ObjectApiResponse") -> list[str]:
+    def __extract_sentences__(self, res : "ObjectApiResponse") -> list[str]:
         '''
         Extract only the sentences from a elasticsearch response.
         Input: response.
@@ -42,7 +42,7 @@ class dbHandle:
         '''
         doc = ({"sentence" : sentence})
 
-        res = self.es.index(index=self.INDEX_NAME, document=doc)
+        res = self.__es__.index(index=self.__INDEX_NAME__, document=doc)
         return res['result']
 
     def get_all(self) -> list[str]:
@@ -50,9 +50,9 @@ class dbHandle:
         Returs all of the entries from DB
         Output: a list of all the sentences
         '''
-        self.es.indices.refresh(index=self.INDEX_NAME)
-        res = self.es.search(index=self.INDEX_NAME, query={"match_all": {}})
-        return self.extract_sentences(res)
+        self.__es__.indices.refresh(index=self.__INDEX_NAME__)
+        res = self.__es__.search(index=self.__INDEX_NAME__, query={"match_all": {}})
+        return self.__extract_sentences__(res)
 
     def get_containing(self, word : str) -> list[str]:
         '''
@@ -60,8 +60,8 @@ class dbHandle:
         Input: word to search.
         Output: a list of all sentences from DB which contain the word.
         '''
-        res = self.es.search(
-            index=self.INDEX_NAME,
+        res = self.__es__.search(
+            index=self.__INDEX_NAME__,
             body={
                 "query": {
                     "bool": {
@@ -73,5 +73,5 @@ class dbHandle:
                 },            
             }
         )
-        return self.extract_sentences(res)
+        return self.__extract_sentences__(res)
 
