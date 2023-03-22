@@ -1,20 +1,34 @@
 from elasticsearch import Elasticsearch
+INDEX_NAME = "sentence-db"
 
 es = Elasticsearch(["https://localhost:9200"], basic_auth=('elastic', 'I+MKSmMOkyeXaMNA8Gpb'), ca_certs="/Users/hilalipik/fionic_internship/elasticsearch-exr/http_ca.crt")
-__sentence_counter__=0
+
+def delete_db():
+    es.indices.delete(index=INDEX_NAME)
 
 def init_db():
     '''
-    Initializes data base with one sentence.
-    Ooutput:the result from elasticsearch.
+    Initializes data base if needed.
     '''
-    global __sentence_counter__
+    if not es.indices.exists(index=INDEX_NAME):
+        mappings = {
+            "properties": {
+                "sentence": {"type": "text"} #, "analyzer": "standard"}
+            }
+        }
+        es.indices.create(index=INDEX_NAME, mappings=mappings)
 
-    doc = {0 : "Hello world!"}
-    resp = es.index(index="sentence-db", id=0, document=doc)
-    __sentence_counter__ = 1
-
-    return resp['result']
+def extract_sentences(res : "ObjectApiResponse") -> list[str]:
+    '''
+    Extract only the sentences from a elasticsearch response.
+    Input: response.
+    Output: a list of all sentences in the response.
+    '''
+    sentence_list = []
+    res = res['hits']['hits']
+    for sentence in res:
+        sentence_list.append(sentence['_source']['sentence'])
+    return sentence_list
 
 def write(sentence : str) -> str:
     '''
@@ -22,40 +36,41 @@ def write(sentence : str) -> str:
     Input: sentence to add.
     Output: the result from elasticsearch.
     '''
-    global __sentence_counter__
+    sentence_count = len(get_all()) # start adding sentences at the end
+    doc = ({"sentence" : sentence})
 
-    doc = __get_all__()
-    doc.update({__sentence_counter__: sentence})
-
-    resp = es.index(index="sentence-db", id=0, document=doc)
-    __sentence_counter__ +=1
+    resp = es.index(index=INDEX_NAME, document=doc)
     return resp['result']
-
-def __get_all__() -> dict:
-    '''
-    Returs all of the entries from DB
-    Output: a dictionary of all the sentences
-    '''
-    return es.get(index="sentence-db", id=0)['_source']
 
 def get_all() -> list[str]:
     '''
     Returs all of the entries from DB
     Output: a list of all the sentences
     '''
-    return list(__get_all__().values())
- 
+    es.indices.refresh(index=INDEX_NAME)
+    b = {"match_all": {}}
+    res = es.search(index=INDEX_NAME, query=b)
+    return extract_sentences(res)
+
 def get_containing(word : str) -> list[str]:
     '''
     Gets all sentences from DB which contain a wanted word
-    Input: sentence to add.
-    Output: the result from elasticsearch.
+    Input: word to search.
+    Output: a list of all sentences from DB which contain the word.
     '''
-    all_sentences = get_all()
-    containing=[]
-    for sentence in all_sentences:
-        if word in sentence:
-            containing.append(sentence)
-    return containing
+    res = es.search(
+        index=INDEX_NAME,
+        body={
+            "query": {
+                "bool": {
+                    "must": {
+                        "match": {"sentence": word}
+                    },
+                    "filter": {"bool": {"must_not": {"match_phrase": {"director": "roman polanski"}}}},
+                },
+            },            
+        }
+    )
+    return extract_sentences(res)
 
-__sentence_counter__ = len(get_all()) # start adding sentences at the end
+init_db()

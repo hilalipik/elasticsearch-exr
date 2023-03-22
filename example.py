@@ -1,5 +1,4 @@
 import sentenceDBlib as dbHandle
-dbHandle.init_db()
 
 print(f'Current sentences: \n{dbHandle.get_all()}')
 print('Adding three more...')
