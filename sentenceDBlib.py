@@ -1,7 +1,11 @@
 from elasticsearch import Elasticsearch
 
 class dbHandle:
-    def __init__(self, db_name):
+    def __init__(self, db_name : str):
+        '''
+        Initializer
+        Input: the desired database name.
+        '''
         self.__INDEX_NAME__ = db_name
         self.__es__ = Elasticsearch(["http://localhost:9200"])
         self.__init_db__()
