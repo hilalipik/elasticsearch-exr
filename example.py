@@ -1,11 +1,16 @@
-import sentenceDBlib as dbHandle
+from sentenceDBlib import dbHandle
 
-print(f'Current sentences: \n{dbHandle.get_all()}')
-print('Adding three more...')
-dbHandle.write("this is my program")
-dbHandle.write("my program is great!")
-dbHandle.write("elasticsearch is great")
+def main():
+    handle = dbHandle("sentence-db")
+    print(f'Current sentences: \n{handle.get_all()}')
+    print('Adding three more...')
+    handle.write("this is my program")
+    handle.write("my program is great!")
+    handle.write("elasticsearch is great")
 
-print(f'Current sentences: \n{dbHandle.get_all()}')
-print(f' only sentences containing the word "program": \n{dbHandle.get_containing("program")}')
-print(f' only sentences containing the word "great": \n{dbHandle.get_containing("great")}')
+    print(f'Current sentences: \n{handle.get_all()}')
+    print(f' only sentences containing the word "program": \n{handle.get_containing("program")}')
+    print(f' only sentences containing the word "great": \n{handle.get_containing("great")}')
+
+if __name__ == "__main__":
+    main()
