@@ -3,7 +3,7 @@ from elasticsearch import Elasticsearch
 class DBHandle:
     def __init__(self, db_name : str):
         '''
-        Initializer
+        Initializer, connects to db and creates it if needed.
         Input: the desired database name.
         '''
         self._INDEX_NAME = db_name
@@ -12,6 +12,9 @@ class DBHandle:
 
 
     def _delete_db(self):
+        '''
+        Deletes the database.
+        '''
         self._es.indices.delete(index=self._INDEX_NAME)
 
     def _init_db(self):
@@ -26,7 +29,7 @@ class DBHandle:
             }
             self._es.indices.create(index=self._INDEX_NAME, mappings=mappings)
 
-    def _extract_sentences(self, res : "ObjectApiResponse") -> list[str]:
+    def _extract_sentences(self, res : dict) -> list[str]:
         '''
         Extract only the sentences from a elasticsearch response.
         Input: response.
