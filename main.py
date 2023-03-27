@@ -11,7 +11,6 @@ def main():
     print(f'Current sentences: \n{handle.get_all()}')
     print(f' only sentences containing the word "program": \n{handle.get_containing("program")}')
     print(f' only sentences containing the word "great": \n{handle.get_containing("great")}')
-    handle._delete_db()
 
 
 if __name__ == "__main__":

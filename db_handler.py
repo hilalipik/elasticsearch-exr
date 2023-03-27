@@ -11,7 +11,7 @@ class DBHandle:
         self._init_db()
 
 
-    def _delete_db(self):
+    def delete_db(self):
         '''
         Deletes the database.
         '''
@@ -41,7 +41,7 @@ class DBHandle:
             sentence_list.append(sentence['_source']['sentence'])
         return sentence_list
 
-    def write(self, sentence : str) -> str:
+    def write(self, sentence : str):
         '''
         Writes a sentence to the elasticsearch DB.
         Input: sentence to add.
@@ -52,7 +52,7 @@ class DBHandle:
 
     def get_all(self) -> list[str]:
         '''
-        Returs all of the entries from DB
+        Returns all of the entries from DB
         Output: a list of all the sentences
         '''
         self._es.indices.refresh(index=self._INDEX_NAME)
